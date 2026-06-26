@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cable Tray Calc">
+<title>Cable Tray Rate Calculator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:#f0ede8;
+  color:#1a1a18;
+  min-height:100vh;
+}
+/* ── Top bar ── */
+.topbar{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 20px;
+  background:#ffffff;
+  border-bottom:1px solid #d0cec9;
+  position:sticky;top:0;z-index:10;
+}
+.topbar-title{font-size:17px;font-weight:700;color:#1a1a18;}
+.live-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:#d4edda;color:#155724;}
+.topbar-sub{font-size:13px;color:#888;margin-left:auto;}
+/* ── Body layout ── */
+.body-layout{display:flex;min-height:calc(100vh - 53px);}
+/* ── Sidebar ── */
+.sidebar{
+  width:230px;flex-shrink:0;
+  background:#f7f5f2;
+  border-right:1px solid #d0cec9;
+  padding:14px 12px;
+  display:flex;flex-direction:column;gap:12px;
+}
+.sb-card{
+  background:#ffffff;
+  border:1px solid #d0cec9;
+  border-radius:12px;
+  padding:14px;
+}
+.sec-label{
+  font-size:10px;font-weight:700;color:#888;
+  letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:11px;
+}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+.field:last-of-type{margin-bottom:0;}
+.field label{font-size:12px;color:#555;}
+.field input{
+  width:100%;font-size:15px;padding:9px 11px;
+  border-radius:8px;border:1px solid #c0bebb;
+  background:#fff;color:#1a1a18;
+  -webkit-appearance:none;appearance:none;
+}
+.field input:focus{outline:none;border-color:#378add;box-shadow:0 0 0 2px rgba(55,138,221,0.15);}
+.kg-pill{
+  margin-top:8px;padding:10px 12px;
+  background:#e8f2fc;border-radius:8px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.kg-pill .kl{font-size:12px;color:#0C447C;font-weight:600;}
+.kg-pill .kv{font-size:18px;font-weight:700;color:#0C447C;}
+/* Discount banner */
+.disc-card{
+  background:#fff8ee;
+  border:1px solid #e8c170;
+  border-radius:12px;
+  padding:14px;
+}
+.disc-title{font-size:11px;font-weight:700;color:#633806;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;}
+.disc-card input{
+  width:100%;font-size:16px;padding:9px 11px;
+  border-radius:8px;border:1px solid #e8c170;
+  background:#fff;color:#1a1a18;
+  -webkit-appearance:none;appearance:none;
+  margin-bottom:8px;
+}
+.disc-card input:focus{outline:none;border-color:#BA7517;}
+.eff-row{display:flex;justify-content:space-between;align-items:center;margin-top:5px;}
+.effl{font-size:11px;color:#888;}
+.effv{font-size:14px;font-weight:700;color:#1a1a18;}
+.effv.red{color:#a32d2d;}
+/* Summary */
+.sum-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid #e8e6e2;
+}
+.sum-item:last-child{border-bottom:none;}
+.sum-name{font-size:12px;color:#555;}
+.sum-val{font-size:14px;font-weight:700;}
+/* ── Main ── */
+.main{flex:1;padding:16px;display:flex;flex-direction:column;gap:12px;}
+.tray-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+/* Tray cards */
+.tray-card{
+  background:#ffffff;
+  border:1px solid #d0cec9;
+  border-radius:14px;
+  padding:14px 16px;
+}
+.tray-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.tray-title{font-size:15px;font-weight:700;color:#1a1a18;}
+.chip{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.chip-ladder   {background:#E6F1FB;color:#0C447C;}
+.chip-perf     {background:#EAF3DE;color:#27500A;}
+.chip-partition{background:#FAEEDA;color:#633806;}
+.chip-raceway  {background:#EEEDFE;color:#3C3489;}
+.chip-cover    {background:#FAECE7;color:#712B13;}
+.dims-row{display:flex;gap:8px;margin-bottom:12px;}
+.dim-group{flex:1;display:flex;flex-direction:column;gap:5px;}
+.dim-group label{font-size:11px;color:#888;font-weight:500;}
+.dim-group input{
+  width:100%;font-size:14px;padding:9px 10px;
+  border-radius:8px;border:1px solid #c8c6c2;
+  background:#f7f5f2;color:#1a1a18;
+  -webkit-appearance:none;appearance:none;
+}
+.dim-group input:focus{outline:none;border-color:#378add;background:#fff;}
+.results-row{
+  display:flex;gap:8px;
+  padding-top:12px;
+  border-top:1px solid #e8e6e2;
+}
+.res-block{
+  flex:1;text-align:center;padding:9px 4px;
+  border-radius:8px;background:#f7f5f2;
+  border:1px solid #e8e6e2;
+}
+.res-label{font-size:10px;color:#888;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
+.res-val{font-size:17px;font-weight:700;color:#1a1a18;}
+.res-val.green{color:#0a5c3e;}
+.res-val.red  {color:#a32d2d;}
+.res-orig{font-size:11px;color:#aaa;text-decoration:line-through;margin-bottom:2px;min-height:15px;}
+/* Compare card */
+.compare-card{
+  background:#ffffff;
+  border:1px solid #d0cec9;
+  border-radius:14px;
+  padding:14px 16px;
+}
+.bar-row{display:flex;align-items:center;gap:10px;margin:7px 0;}
+.bar-name{font-size:13px;color:#555;width:96px;flex-shrink:0;font-weight:500;}
+.bar-track{
+  flex:1;height:12px;background:#f0ede8;
+  border-radius:6px;overflow:hidden;position:relative;
+}
+.bar-fill{height:100%;border-radius:6px;transition:width .3s ease;}
+.bar-val{font-size:13px;font-weight:700;color:#1a1a18;width:120px;text-align:right;}
+/* Responsive */
+@media(max-width:900px){
+  .body-layout{flex-direction:column;}
+  .sidebar{width:100%;border-right:none;border-bottom:1px solid #d0cec9;flex-direction:row;flex-wrap:wrap;gap:10px;}
+  .sb-card,.disc-card{flex:1;min-width:180px;}
+}
+@media(max-width:580px){
+  .tray-grid{grid-template-columns:1fr;}
+  .dims-row{flex-wrap:wrap;}
+  .dim-group{min-width:calc(50% - 4px);}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-title">⚡ Cable Tray Rate Calculator</span>
+  <span class="live-badge">Live</span>
+  <span class="topbar-sub">All rates in ₹/m</span>
+</div>
+
+<div class="body-layout">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+
+    <div class="sb-card">
+      <div class="sec-label">Sale rate</div>
+      <div class="field"><label>Sheet rate (₹/kg)</label><input type="number" id="sheet" value="88" min="0" step="1" inputmode="decimal"></div>
+      <div class="field"><label>HDG rate (₹/kg)</label><input type="number" id="hdg" value="0" min="0" step="1" inputmode="decimal"></div>
+      <div class="field"><label>T and I (%)</label><input type="number" id="ti" value="0" min="0" step="0.1" inputmode="decimal"></div>
+      <div class="field"><label>GM (%)</label><input type="number" id="gm" value="20" min="0" step="0.1" inputmode="decimal"></div>
+      <div class="kg-pill">
+        <span class="kl">KG rate</span>
+        <span class="kv" id="kg-rate-disp">105.60 ₹</span>
+      </div>
+    </div>
+
+    <div class="disc-card">
+      <div class="disc-title">🏷 Discount</div>
+      <input type="number" id="discount" value="0" min="0" max="100" step="0.1" inputmode="decimal" placeholder="Enter %">
+      <div class="eff-row"><span class="effl">Effective KG rate</span><span class="effv" id="eff-kg">105.60 ₹</span></div>
+      <div class="eff-row"><span class="effl">You save</span><span class="effv red" id="save-pct">0%</span></div>
+    </div>
+
+    <div class="sb-card" style="flex:1;">
+      <div class="sec-label">Quick summary</div>
+      <div id="summary-list"></div>
+    </div>
+
+  </div>
+
+  <!-- Main panel -->
+  <div class="main">
+    <div class="tray-grid">
+
+      <!-- Ladder -->
+      <div class="tray-card">
+        <div class="tray-header"><span class="tray-title">Ladder type</span><span class="chip chip-ladder">Ladder</span></div>
+        <div class="dims-row">
+          <div class="dim-group"><label>Height (mm)</label><input type="number" id="l-h" value="75" min="1" inputmode="decimal"></div>
+          <div class="dim-group"><label>Width (mm)</label><input type="number" id="l-w" value="300" min="1" inputmode="decimal"></div>
+          <div class="dim-group"><label>Thickness (mm)</label><input type="number" id="l-t" value="2" min="0.1" step="0.1" inputmode="decimal"></div>
+        </div>
+        <div class="results-row">
+          <div class="res-block"><div class="res-label">Weight kg/m</div><div class="res-val" id="l-wt">4.61</div></div>
+          <div class="res-block"><div class="res-label">List rate</div><div class="res-orig" id="l-orig"></div><div class="res-val green" id="l-rate">₹487</div></div>
+          <div class="res-block" id="l-net-block" style="display:none"><div class="res-label">After discount</div><div class="res-val red" id="l-net">—</div></div>
+        </div>
+      </div>
+
+      <!-- Perforated -->
+      <div class="tray-card">
+        <div class="tray-header"><span class="tray-title">Perforated type</span><span class="chip chip-perf">Perforated</span></div>
+        <div class="dims-row">
+          <div class="dim-group"><label>Height (mm)</label><input type="number" id="p-h" value="50" min="1" inputmode="decimal"></div>
+          <div class="dim-group"><label>Width (mm)</label><input type="number" id="p-w" value="300" min="1" inputmode="decimal"></div>
+          <div class="dim-group"><label>Thickness (mm)</label><input type="number" id="p-t" value="1.6" min="0.1" step="0.1" inputmode="decimal"></div>
+        </div>
+        <div class="results-row">
+          <div class="res-block"><div class="res-label">Weight kg/m</div><div class="res-val" id="p-wt">5.12</div></div>
+          <div class="res-block"><div class="res-label">List rate</div><div class="res-orig" id="p-orig"></div><div class="res-val green" id="p-rate">₹541</div></div>
+          <div class="res-block" id="p-net-block" style="display:none"><div class="res-label">After discount</div><div class="res-val red" id="p-net">—</div></div>
+        </div>
+      </div>
+
+      <!-- Partition -->
+      <div class="tray-card">
+        <div class="tray-header"><span class="tray-title">Partition</span><span class="chip chip-partition">Partition</span></div>
+        <div class="dims-row">
+          <div class="dim-group"><label>Height (mm)</label><input type="number" id="pt-h" value="50" min="1" inputmode="decimal"></div>
+          <div class="dim-group"><label>Width (mm)</label><input type="number" id="pt-w" value="15" min="1" inputmode="decimal"></div>
+          <div class="dim-group"><label>Thickness (mm)</label><input type="number" id="pt-t" value="2" min="0.1" step="0.1" inputmode="decimal"></div>
+        </div>
+        <div class="results-row">
+          <div class="res-block"><div class="res-label">Weight kg/m</div><div class="res-val" id="pt-wt">1.04</div></div>
+          <div class="res-block"><div class="res-label">List rate</div><div class="res-orig" id="pt-orig"></div><div class="res-val green" id="pt-rate">₹110</div></div>
+          <div class="res-block" id="pt-net-block" style="display:none"><div class="res-label">After discount</div><div class="res-val red" id="pt-net">—</div></div>
+        </div>
+      </div>
+
+      <!-- Raceway -->
+      <div class="tray-card">
+        <div class="tray-header"><span class="tray-title">Raceway / Trunking</span><span class="chip chip-raceway">Raceway</span></div>
+        <div class="dims-row">
+          <div class="dim-group"><label>Height (mm)</label><input type="number" id="r-h" value="75" min="1" inputmode="decimal"></div>
+          <div class="dim-group"><label>Width (mm)</label><input type="number" id="r-w" value="300" min="1" inputmode="decimal"></div>
+          <div class="dim-group"><label>Thickness (mm)</label><input type="number" id="r-t" value="2" min="0.1" step="0.1" inputmode="decimal"></div>
+        </div>
+        <div class="results-row">
+          <div class="res-block"><div class="res-label">Weight kg/m</div><div class="res-val" id="r-wt">12.48</div></div>
+          <div class="res-block"><div class="res-label">List rate</div><div class="res-orig" id="r-orig"></div><div class="res-val green" id="r-rate">₹1318</div></div>
+          <div class="res-block" id="r-net-block" style="display:none"><div class="res-label">After discount</div><div class="res-val red" id="r-net">—</div></div>
+        </div>
+      </div>
+
+      <!-- Cover — full width -->
+      <div class="tray-card" style="grid-column:span 2;">
+        <div class="tray-header"><span class="tray-title">Cover</span><span class="chip chip-cover">Cover</span></div>
+        <div class="dims-row">
+          <div class="dim-group"><label>Width (mm)</label><input type="number" id="c-w" value="300" min="1" inputmode="decimal"></div>
+          <div class="dim-group"><label>Thickness (mm)</label><input type="number" id="c-t" value="2" min="0.1" step="0.1" inputmode="decimal"></div>
+        </div>
+        <div class="results-row">
+          <div class="res-block"><div class="res-label">Weight kg/m</div><div class="res-val" id="c-wt">5.28</div></div>
+          <div class="res-block"><div class="res-label">List rate</div><div class="res-orig" id="c-orig"></div><div class="res-val green" id="c-rate">₹558</div></div>
+          <div class="res-block" id="c-net-block" style="display:none"><div class="res-label">After discount</div><div class="res-val red" id="c-net">—</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Comparison -->
+    <div class="compare-card">
+      <div class="sec-label">Rate comparison (₹/m)</div>
+      <div id="bars"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const g  = id => document.getElementById(id);
+const r2 = v  => Math.round(v * 100) / 100;
+const r0 = v  => Math.round(v);
+const fmt = v => v.toLocaleString('en-IN');
+
+function calcKgRate() {
+  const sheet = +g('sheet').value || 0;
+  const hdg   = +g('hdg').value   || 0;
+  const ti    = +g('ti').value    || 0;
+  const gm    = +g('gm').value    || 0;
+  const base  = sheet + hdg;
+  const total = base + base * ti / 100 + base * gm / 100;
+  g('kg-rate-disp').textContent = r2(total).toFixed(2) + ' ₹';
+  return total;
+}
+
+function setCard(pfx, gross, disc) {
+  const net    = r0(gross * (1 - disc / 100));
+  const hasD   = disc > 0;
+  const rateEl = g(pfx + '-rate');
+  const origEl = g(pfx + '-orig');
+  const netEl  = g(pfx + '-net');
+  const netBlk = g(pfx + '-net-block');
+
+  if (hasD) {
+    origEl.textContent          = '₹' + fmt(r0(gross));
+    rateEl.textContent          = '₹' + fmt(r0(gross));
+    rateEl.style.textDecoration = 'line-through';
+    rateEl.style.fontSize       = '13px';
+    rateEl.style.color          = '#aaa';
+    netEl.textContent           = '₹' + fmt(net);
+    netBlk.style.display        = '';
+  } else {
+    origEl.textContent          = '';
+    rateEl.textContent          = '₹' + fmt(r0(gross));
+    rateEl.style.textDecoration = 'none';
+    rateEl.style.fontSize       = '17px';
+    rateEl.style.color          = '#0a5c3e';
+    netBlk.style.display        = 'none';
+  }
+  return hasD ? net : r0(gross);
+}
+
+function calcAll() {
+  const kg   = calcKgRate();
+  const disc = Math.min(100, Math.max(0, +g('discount').value || 0));
+
+  g('eff-kg').textContent   = r2(kg * (1 - disc / 100)).toFixed(2) + ' ₹';
+  g('save-pct').textContent = disc > 0 ? disc.toFixed(1) + '%' : '0%';
+
+  const lH = +g('l-h').value||0, lW = +g('l-w').value||0, lT = +g('l-t').value||0;
+  const lWt = (((30+lH)*2*lT*0.008) + ((lW/1000)*65*4*lT*0.008));
+  g('l-wt').textContent = r2(lWt);
+  const lFinal = setCard('l', r0(kg*lWt), disc);
+
+  const pH = +g('p-h').value||0, pW = +g('p-w').value||0, pT = +g('p-t').value||0;
+  const pWt = ((pH*2)+pW)*0.008*pT;
+  g('p-wt').textContent = r2(pWt);
+  const pFinal = setCard('p', r0(kg*pWt), disc);
+
+  const ptH = +g('pt-h').value||0, ptW = +g('pt-w').value||0, ptT = +g('pt-t').value||0;
+  const ptWt = (ptH+ptW)*0.008*ptT;
+  g('pt-wt').textContent = r2(ptWt);
+  const ptFinal = setCard('pt', r0(kg*ptWt), disc);
+
+  const rH = +g('r-h').value||0, rW = +g('r-w').value||0, rT = +g('r-t').value||0;
+  const rWt = (((rH*2)+rW)+(rW+30))*0.008*rT;
+  g('r-wt').textContent = r2(rWt);
+  const rFinal = setCard('r', r0(kg*rWt), disc);
+
+  const cW = +g('c-w').value||0, cT = +g('c-t').value||0;
+  const cWt = (cW+30)*0.008*cT;
+  g('c-wt').textContent = r2(cWt);
+  const cFinal = setCard('c', r0(kg*cWt), disc);
+
+  const data = [
+    {n:'Ladder',     gross:r0(kg*lWt),  final:lFinal,  col:'#2a78d6'},
+    {n:'Perforated', gross:r0(kg*pWt),  final:pFinal,  col:'#1baf7a'},
+    {n:'Partition',  gross:r0(kg*ptWt), final:ptFinal, col:'#eda100'},
+    {n:'Raceway',    gross:r0(kg*rWt),  final:rFinal,  col:'#4a3aa7'},
+    {n:'Cover',      gross:r0(kg*cWt),  final:cFinal,  col:'#e34948'},
+  ];
+  const mx   = Math.max(...data.map(d => d.gross)) || 1;
+  const hasD = disc > 0;
+
+  g('bars').innerHTML = data.map(d => {
+    const gP = Math.round(d.gross / mx * 100);
+    const fP = Math.round(d.final / mx * 100);
+    const bar = hasD
+      ? `<div style="position:absolute;top:0;left:0;width:${gP}%;height:100%;background:${d.col};opacity:0.2;border-radius:6px;"></div><div style="position:relative;width:${fP}%;height:100%;background:${d.col};border-radius:6px;"></div>`
+      : `<div class="bar-fill" style="width:${gP}%;background:${d.col};"></div>`;
+    const lbl = hasD
+      ? `<span style="font-size:11px;color:#aaa;text-decoration:line-through;">₹${fmt(d.gross)}</span>&nbsp;<span style="color:#a32d2d;font-weight:700;">₹${fmt(d.final)}</span>`
+      : `₹${fmt(d.gross)}`;
+    return `<div class="bar-row">
+      <span class="bar-name">${d.n}</span>
+      <div class="bar-track">${bar}</div>
+      <span class="bar-val">${lbl}</span>
+    </div>`;
+  }).join('');
+
+  g('summary-list').innerHTML = data.map(d => `
+    <div class="sum-item">
+      <span class="sum-name">${d.n}</span>
+      <span class="sum-val" style="color:${hasD ? '#a32d2d' : '#0a5c3e'};">₹${fmt(d.final)}</span>
+    </div>`).join('');
+}
+
+document.addEventListener('input', calcAll);
+calcAll();
+</script>
+</body>
+</html>
